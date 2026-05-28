@@ -3,6 +3,8 @@ export {
   createMatch,
   createRoom,
   deleteRoom,
+  getRoomByCode,
+  getRoomById,
   listFriends,
   listGames,
   listLeaderboard,
