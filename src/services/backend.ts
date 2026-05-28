@@ -380,6 +380,26 @@ export async function listRooms(gameId?: string): Promise<Room[]> {
   return gameId ? rooms.filter((room) => room.gameId === gameId) : rooms;
 }
 
+export async function getRoomById(roomId: string): Promise<Room | null> {
+  if (supabase) {
+    const { data, error } = await supabase.from('game_rooms').select('*').eq('id', roomId).single();
+    if (!error && data) return mapRoomRow(data as Record<string, unknown>);
+  }
+
+  return readMockState().rooms.find((room) => room.id === roomId) ?? null;
+}
+
+export async function getRoomByCode(code: string): Promise<Room | null> {
+  const normalized = code.trim().toUpperCase();
+
+  if (supabase) {
+    const { data, error } = await supabase.from('game_rooms').select('*').eq('code', normalized).single();
+    if (!error && data) return mapRoomRow(data as Record<string, unknown>);
+  }
+
+  return readMockState().rooms.find((room) => room.code.toUpperCase() === normalized) ?? null;
+}
+
 export async function createRoom(payload: RoomPayload) {
   const room: Room = {
     id: generateId('room'),

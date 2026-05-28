@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { subscribeToRoom } from '../services/realtime';
-import { listMessages, listRooms, sendMessage, updateRoom } from '../services/gameService';
+import { getRoomById, listMessages, sendMessage, updateRoom } from '../services/gameService';
 import type { Message, Room } from '../types';
 import { emptyBoard, getTicTacToeWinner } from '../utils/gameLogic';
 
@@ -30,8 +30,7 @@ export function useRealtimeRoom(roomId: string | undefined, userId: string | und
     let active = true;
 
     const bootstrap = async () => {
-      const [rooms, messageList] = await Promise.all([listRooms(), listMessages(roomId)]);
-      const room = rooms.find((entry) => entry.id === roomId) ?? null;
+      const [room, messageList] = await Promise.all([getRoomById(roomId), listMessages(roomId)]);
 
       if (!active) return;
 

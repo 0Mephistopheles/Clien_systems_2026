@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import PageMeta from '../components/common/PageMeta';
 import GameCard from '../components/games/GameCard';
 import SectionHeader from '../components/ui/SectionHeader';
@@ -85,20 +85,30 @@ export default function GamesPage() {
         <SectionHeader eyebrow="Open rooms" title="Active lobbies" />
         <div className="grid grid--2">
           {rooms.length
-            ? rooms.map((room) => (
-                <article key={room.id} className="room-preview">
-                  <div>
-                    <strong>{room.name}</strong>
-                    <p>{room.code}</p>
-                  </div>
-                  <div>
-                    <span>
-                      {room.currentPlayers}/{room.maxPlayers}
-                    </span>
-                    <span>{room.status}</span>
-                  </div>
-                </article>
-              ))
+            ? rooms.map((room) => {
+                const game = games.find((entry) => entry.id === room.gameId);
+                const roomPath = game ? `/games/${game.slug}/rooms/${room.id}` : `/games/rooms/${room.id}`;
+
+                return (
+                  <article key={room.id} className="room-preview">
+                    <div>
+                      <strong>{room.name}</strong>
+                      <p>{room.code}</p>
+                    </div>
+                    <div>
+                      <span>
+                        {room.currentPlayers}/{room.maxPlayers}
+                      </span>
+                      <span>{room.status}</span>
+                    </div>
+                    <div className="room-preview__actions">
+                      <Link className="btn btn--secondary btn--sm" to={roomPath}>
+                        Join room
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })
             : Array.from({ length: 2 }).map((_, index) => <Skeleton key={index} className="room-preview" style={{ minHeight: 120 }} />)}
         </div>
         <p className="muted">
