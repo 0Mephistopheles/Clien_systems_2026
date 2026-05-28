@@ -1,0 +1,25 @@
+$bg: #07111f;
+$bg-soft: #0d1b31;
+$surface: rgba(12, 21, 40, 0.88);
+$surface-strong: rgba(18, 29, 54, 0.98);
+$border: rgba(160, 187, 255, 0.14);
+$text: #edf5ff;
+$muted: #98abc7;
+$accent: #6cf5ff;
+$accent-2: #8b7dff;
+$success: #46e6a8;
+$warning: #ffc857;
+$danger: #ff6b6b;
+$shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+$radius-xl: 28px;
+$radius-lg: 20px;
+$radius-md: 14px;
+$radius-sm: 10px;
+$max-width: 1200px;
+
+$breakpoints: (
+  sm: 560px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1280px,
+);
