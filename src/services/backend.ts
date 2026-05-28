@@ -190,7 +190,7 @@ export async function registerUser(payload: RegisterPayload) {
 
     return {
       userId: data.user?.id ?? '',
-      requiresVerification: true,
+      requiresVerification: !data.session,
     };
   }
 

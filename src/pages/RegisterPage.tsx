@@ -6,7 +6,7 @@ export default function RegisterPage() {
     <>
       <PageMeta
         title="Register"
-        description="Create a new account and verify your email to join multiplayer rooms."
+        description="Create a new account to join multiplayer rooms."
       />
       <AuthForm mode="register" />
     </>
