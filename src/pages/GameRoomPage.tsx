@@ -28,6 +28,15 @@ export default function GameRoomPage() {
     return <EmptyState title="Loading room" description="Fetching realtime room data..." />;
   }
 
+  if (!room) {
+    return (
+      <EmptyState
+        title="Room unavailable"
+        description="This room could not be found, or you do not have access to it."
+      />
+    );
+  }
+
   return (
     <>
       <PageMeta title={`Room ${roomId}`} description="Realtime room with synchronized gameplay and chat." />

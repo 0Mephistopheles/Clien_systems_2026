@@ -36,6 +36,14 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/games/rooms/:roomId"
+              element={
+                <ProtectedRoute>
+                  <GameRoomPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
