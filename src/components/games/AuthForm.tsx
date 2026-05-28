@@ -70,7 +70,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <p>
             {isLogin
               ? 'Use your Supabase verified account or the local demo session.'
-              : 'Register to receive an email verification link via Supabase.'}
+              : 'Register to create your account and start playing.'}
           </p>
         </div>
         {!isLogin ? (
