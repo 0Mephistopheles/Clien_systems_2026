@@ -9,14 +9,16 @@ export type RealtimeCallbacks = {
 };
 
 export function subscribeToRoom(roomId: string, userId: string, callbacks: RealtimeCallbacks) {
-  if (!supabase) {
+  const client = supabase;
+
+  if (!client) {
     return {
       channel: null as RealtimeChannel | null,
       unsubscribe: () => undefined,
     };
   }
 
-  const channel = supabase.channel(`room:${roomId}`, {
+  const channel = client.channel(`room:${roomId}`, {
     config: {
       presence: { key: userId },
     },
@@ -65,7 +67,7 @@ export function subscribeToRoom(roomId: string, userId: string, callbacks: Realt
   return {
     channel,
     unsubscribe: () => {
-      supabase.removeChannel(channel);
+      client.removeChannel(channel);
     },
   };
 }
