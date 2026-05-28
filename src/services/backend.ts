@@ -1,11 +1,13 @@
 import { hasSupabaseConfig, supabase } from '../api/supabase';
 import type {
   AppSession,
+  Friend,
   Game,
   LeaderboardEntry,
   Message,
   NotificationItem,
   Profile,
+  Match,
   Room,
   Role,
 } from '../types';
@@ -368,21 +370,22 @@ export async function sendMessage(roomId: string, content: string) {
   const session = await getActiveSession();
   if (!session) throw new Error('No session available. Please sign in first.');
   const state = readMockState();
-  const sender = supabase
-    ? (((await supabase.from('profiles').select('*').eq('id', session.userId).single()).data as Record<string, unknown> | null) ?? null)
-    : state.profiles.find((profile) => profile.id === session.userId) ?? null;
+  let sender: Profile | null = state.profiles.find((profile) => profile.id === session.userId) ?? null;
+
+  if (supabase) {
+    const { data } = await supabase.from('profiles').select('*').eq('id', session.userId).single();
+    sender = data ? mapProfileRow(data as Record<string, unknown>) : null;
+  }
 
   if (!sender) {
     throw new Error('Profile not found.');
   }
 
-  const senderProfile = supabase ? mapProfileRow(sender) : sender;
-
   const message: Message = {
     id: generateId('msg'),
     roomId,
-    senderId: senderProfile.id,
-    senderName: senderProfile.username,
+    senderId: sender.id,
+    senderName: sender.username,
     content,
     createdAt: new Date().toISOString(),
   };
@@ -501,7 +504,7 @@ export async function listMatches(userId?: string): Promise<Match[]> {
   return readMockState().matches;
 }
 
-export async function listFriends(userId?: string) {
+export async function listFriends(userId?: string): Promise<Friend[]> {
   const state = readMockState();
   if (!userId) return state.friends;
   return state.friends.filter((friend) => friend.requesterId === userId || friend.addresseeId === userId);
