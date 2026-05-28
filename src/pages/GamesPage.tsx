@@ -4,6 +4,7 @@ import PageMeta from '../components/common/PageMeta';
 import GameCard from '../components/games/GameCard';
 import SectionHeader from '../components/ui/SectionHeader';
 import Card from '../components/ui/Card';
+import EmptyState from '../components/ui/EmptyState';
 import Skeleton from '../components/ui/Skeleton';
 import { useAuth } from '../context/AuthContext';
 import { createRoom, listGames, listRooms } from '../services/gameService';
@@ -16,12 +17,14 @@ export default function GamesPage() {
   const { profile, isAuthenticated } = useAuth();
   const [games, setGames] = useState<Game[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     void (async () => {
       const [nextGames, nextRooms] = await Promise.all([listGames(), listRooms()]);
       setGames(nextGames);
       setRooms(nextRooms);
+      setLoading(false);
     })();
   }, []);
 
@@ -83,34 +86,47 @@ export default function GamesPage() {
 
       <section className="page-section">
         <SectionHeader eyebrow="Open rooms" title="Active lobbies" />
-        <div className="grid grid--2">
-          {rooms.length
-            ? rooms.map((room) => {
-                const game = games.find((entry) => entry.id === room.gameId);
-                const roomPath = game ? `/games/${game.slug}/rooms/${room.id}` : `/games/rooms/${room.id}`;
+        {loading ? (
+          <div className="grid grid--2">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <Skeleton key={index} className="room-preview" style={{ minHeight: 120 }} />
+            ))}
+          </div>
+        ) : rooms.length ? (
+          <div className="grid grid--2">
+            {rooms.map((room) => {
+              const game = games.find((entry) => entry.id === room.gameId);
+              const roomPath = game ? `/games/${game.slug}/rooms/${room.id}` : `/games/rooms/${room.id}`;
 
-                return (
-                  <article key={room.id} className="room-preview">
-                    <div>
-                      <strong>{room.name}</strong>
-                      <p>{room.code}</p>
-                    </div>
-                    <div>
-                      <span>
-                        {room.currentPlayers}/{room.maxPlayers}
-                      </span>
-                      <span>{room.status}</span>
-                    </div>
-                    <div className="room-preview__actions">
-                      <Link className="btn btn--secondary btn--sm" to={roomPath}>
-                        Join room
-                      </Link>
-                    </div>
-                  </article>
-                );
-              })
-            : Array.from({ length: 2 }).map((_, index) => <Skeleton key={index} className="room-preview" style={{ minHeight: 120 }} />)}
-        </div>
+              return (
+                <article key={room.id} className="room-preview">
+                  <div>
+                    <strong>{room.name}</strong>
+                    <p>{room.code}</p>
+                  </div>
+                  <div>
+                    <span>
+                      {room.currentPlayers}/{room.maxPlayers}
+                    </span>
+                    <span>{room.status}</span>
+                  </div>
+                  <div className="room-preview__actions">
+                    <Link className="btn btn--secondary btn--sm" to={roomPath}>
+                      Join room
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState
+            title="No active lobbies yet"
+            description="Create a room from a game card and it will appear here for others to join."
+            actionLabel="Browse games"
+            onAction={() => navigate('/games')}
+          />
+        )}
         <p className="muted">
           {Object.entries(roomsByGame).map(([gameId, entries]) => `${gameId}: ${entries.length}`).join(' | ')}
         </p>
