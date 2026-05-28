@@ -22,33 +22,38 @@ export function subscribeToRoom(roomId: string, userId: string, callbacks: Realt
     },
   });
 
-  if (callbacks.onBoard) {
+  const onBoard = callbacks.onBoard;
+  const onMessage = callbacks.onMessage;
+  const onPresence = callbacks.onPresence;
+  const onRoom = callbacks.onRoom;
+
+  if (onBoard) {
     channel.on('broadcast', { event: 'board' }, ({ payload }) => {
-      callbacks.onBoard((payload as { board: string[] }).board);
+      onBoard((payload as { board: string[] }).board);
     });
   }
 
-  if (callbacks.onMessage) {
+  if (onMessage) {
     channel.on('broadcast', { event: 'message' }, ({ payload }) => {
-      callbacks.onMessage(payload);
+      onMessage(payload);
     });
     channel.on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'messages', filter: `room_id=eq.${roomId}` },
       ({ new: nextMessage }) => {
-        callbacks.onMessage(nextMessage);
+        onMessage(nextMessage);
       },
     );
   }
 
-  if (callbacks.onRoom) {
+  if (onRoom) {
     channel.on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: `id=eq.${roomId}` }, ({ new: nextRoom }) => {
-      callbacks.onRoom(nextRoom);
+      onRoom(nextRoom);
     });
   }
 
   channel.on('presence', { event: 'sync' }, () => {
-    callbacks.onPresence?.(channel.presenceState());
+    onPresence?.(channel.presenceState());
   });
 
   channel.subscribe(async (status) => {
