@@ -3,6 +3,7 @@ import type {
   AppSession,
   Friend,
   Game,
+  GameSlug,
   LeaderboardEntry,
   Message,
   NotificationItem,
@@ -75,10 +76,24 @@ function mapProfilePatch(patch: UpdateProfilePayload) {
   return row;
 }
 
+const gameSlugs: GameSlug[] = [
+  'tic-tac-toe',
+  'rock-paper-scissors',
+  'memory-duel',
+  'speed-reaction',
+  'quiz-battle',
+  'number-guess',
+];
+
+function toGameSlug(value: unknown): GameSlug {
+  const slug = String(value ?? '');
+  return gameSlugs.includes(slug as GameSlug) ? (slug as GameSlug) : 'tic-tac-toe';
+}
+
 function mapGameRow(row: Record<string, unknown>): Game {
   return {
     id: String(row.id ?? ''),
-    slug: String(row.slug ?? ''),
+    slug: toGameSlug(row.slug),
     title: String(row.title ?? ''),
     description: String(row.description ?? ''),
     playersMin: Number(row.players_min ?? row.playersMin ?? 0),
