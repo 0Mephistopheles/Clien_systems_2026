@@ -1,0 +1,39 @@
+.muted {
+  color: var(--color-muted);
+}
+
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid--2 {
+  grid-template-columns: 1fr;
+}
+
+.grid--3 {
+  grid-template-columns: 1fr;
+}
+
+.page-section {
+  margin-top: 3rem;
+}
+
+.chip {
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-text);
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+}
+
+.chip--active {
+  background: linear-gradient(135deg, rgba(108, 245, 255, 0.22), rgba(139, 125, 255, 0.28));
+  border-color: rgba(108, 245, 255, 0.45);
+}

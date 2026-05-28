@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Multiplayer Mini Games Platform">
+  <defs>
+    <linearGradient id="g" x1="20%" y1="20%" x2="80%" y2="80%">
+      <stop offset="0%" stop-color="#6cf5ff" />
+      <stop offset="100%" stop-color="#8b7dff" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="#07111f" />
+  <path d="M50 72h44l34 54 34-54h44l-78 132h-4L50 72z" fill="url(#g)" />
+</svg>

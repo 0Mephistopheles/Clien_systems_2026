@@ -1,0 +1,19 @@
+@use 'sass:map';
+@use './variables' as *;
+
+@mixin respond($size) {
+  @media (min-width: map.get($breakpoints, $size)) {
+    @content;
+  }
+}
+
+@mixin glass {
+  background: linear-gradient(180deg, rgba(20, 33, 61, 0.92), rgba(11, 18, 32, 0.92));
+  border: 1px solid $border;
+  box-shadow: $shadow;
+  backdrop-filter: blur(18px);
+}
+
+@mixin glow($color) {
+  box-shadow: 0 0 0 1px rgba($color, 0.16), 0 0 30px rgba($color, 0.2);
+}
