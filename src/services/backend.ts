@@ -75,6 +75,88 @@ function mapProfilePatch(patch: UpdateProfilePayload) {
   return row;
 }
 
+function mapGameRow(row: Record<string, unknown>): Game {
+  return {
+    id: String(row.id ?? ''),
+    slug: String(row.slug ?? ''),
+    title: String(row.title ?? ''),
+    description: String(row.description ?? ''),
+    playersMin: Number(row.players_min ?? row.playersMin ?? 0),
+    playersMax: Number(row.players_max ?? row.playersMax ?? 0),
+    genre: String(row.genre ?? ''),
+    realtime: Boolean(row.realtime ?? false),
+    accent: String(row.accent ?? 'cyan'),
+    rating: Number(row.rating ?? 0),
+  };
+}
+
+function mapRoomRow(row: Record<string, unknown>): Room {
+  return {
+    id: String(row.id ?? ''),
+    gameId: String(row.game_id ?? row.gameId ?? ''),
+    name: String(row.name ?? ''),
+    hostId: String(row.host_id ?? row.hostId ?? ''),
+    status: (row.status as Room['status']) ?? 'open',
+    maxPlayers: Number(row.max_players ?? row.maxPlayers ?? 0),
+    currentPlayers: Number(row.current_players ?? row.currentPlayers ?? 0),
+    code: String(row.code ?? ''),
+    isPrivate: Boolean(row.is_private ?? row.isPrivate ?? false),
+    board: Array.isArray(row.board) ? (row.board as string[]) : [],
+    currentTurn: (row.current_turn as Room['currentTurn']) ?? 'X',
+    winner: (row.winner as Room['winner']) ?? null,
+    lastActivity: String(row.last_activity ?? row.lastActivity ?? new Date().toISOString()),
+  };
+}
+
+function mapLeaderboardRow(row: Record<string, unknown>): LeaderboardEntry {
+  return {
+    id: String(row.id ?? ''),
+    profileId: String(row.profile_id ?? row.profileId ?? ''),
+    username: String(row.username ?? ''),
+    avatarUrl: String(row.avatar_url ?? row.avatarUrl ?? ''),
+    gameId: String(row.game_id ?? row.gameId ?? ''),
+    points: Number(row.points ?? 0),
+    wins: Number(row.wins ?? 0),
+    matches: Number(row.matches ?? 0),
+    rank: Number(row.rank ?? 0),
+  };
+}
+
+function mapMessageRow(row: Record<string, unknown>): Message {
+  return {
+    id: String(row.id ?? ''),
+    roomId: String(row.room_id ?? row.roomId ?? ''),
+    senderId: String(row.sender_id ?? row.senderId ?? ''),
+    senderName: String(row.sender_name ?? row.senderName ?? ''),
+    content: String(row.content ?? ''),
+    createdAt: String(row.created_at ?? row.createdAt ?? new Date().toISOString()),
+  };
+}
+
+function mapNotificationRow(row: Record<string, unknown>): NotificationItem {
+  return {
+    id: String(row.id ?? ''),
+    userId: String(row.user_id ?? row.userId ?? ''),
+    title: String(row.title ?? ''),
+    body: String(row.body ?? ''),
+    readAt: (row.read_at ?? row.readAt ?? null) as string | null,
+    createdAt: String(row.created_at ?? row.createdAt ?? new Date().toISOString()),
+  };
+}
+
+function mapMatchRow(row: Record<string, unknown>): Match {
+  return {
+    id: String(row.id ?? ''),
+    gameId: String(row.game_id ?? row.gameId ?? ''),
+    roomId: String(row.room_id ?? row.roomId ?? ''),
+    winnerId: (row.winner_id ?? row.winnerId ?? null) as string | null,
+    status: (row.status as Match['status']) ?? 'pending',
+    score: Number(row.score ?? 0),
+    startedAt: String(row.started_at ?? row.startedAt ?? new Date().toISOString()),
+    endedAt: (row.ended_at ?? row.endedAt ?? null) as string | null,
+  };
+}
+
 async function getActiveSession() {
   if (hasSupabaseConfig) {
     return loadSession();
@@ -265,7 +347,7 @@ export async function updateCurrentProfile(payload: UpdateProfilePayload) {
 export async function listGames(): Promise<Game[]> {
   if (supabase) {
     const { data, error } = await supabase.from('games').select('*').order('title');
-    if (!error && data) return data as Game[];
+    if (!error && data) return data.map((row) => mapGameRow(row as Record<string, unknown>));
   }
 
   return readMockState().games;
@@ -276,7 +358,7 @@ export async function listRooms(gameId?: string): Promise<Room[]> {
     let query = supabase.from('game_rooms').select('*').order('last_activity', { ascending: false });
     if (gameId) query = query.eq('game_id', gameId);
     const { data, error } = await query;
-    if (!error && data) return data as Room[];
+    if (!error && data) return data.map((row) => mapRoomRow(row as Record<string, unknown>));
   }
 
   const rooms = readMockState().rooms;
@@ -302,7 +384,7 @@ export async function createRoom(payload: RoomPayload) {
 
   if (supabase) {
     const { data, error } = await supabase.from('game_rooms').insert(room).select().single();
-    if (!error && data) return data as Room;
+    if (!error && data) return mapRoomRow(data as Record<string, unknown>);
   }
 
   updateMockState((state) => ({
@@ -316,7 +398,7 @@ export async function createRoom(payload: RoomPayload) {
 export async function updateRoom(roomId: string, patch: Partial<Room>) {
   if (supabase) {
     const { data, error } = await supabase.from('game_rooms').update(patch).eq('id', roomId).select().single();
-    if (!error && data) return data as Room;
+    if (!error && data) return mapRoomRow(data as Record<string, unknown>);
   }
 
   let updated: Room | null = null;
@@ -347,7 +429,7 @@ export async function deleteRoom(roomId: string) {
 export async function listLeaderboard(): Promise<LeaderboardEntry[]> {
   if (supabase) {
     const { data, error } = await supabase.from('leaderboard').select('*').order('rank');
-    if (!error && data) return data as LeaderboardEntry[];
+    if (!error && data) return data.map((row) => mapLeaderboardRow(row as Record<string, unknown>));
   }
 
   return readMockState().leaderboard;
@@ -360,7 +442,7 @@ export async function listMessages(roomId: string): Promise<Message[]> {
       .select('*')
       .eq('room_id', roomId)
       .order('created_at');
-    if (!error && data) return data as Message[];
+    if (!error && data) return data.map((row) => mapMessageRow(row as Record<string, unknown>));
   }
 
   return readMockState().messages.filter((message) => message.roomId === roomId);
@@ -392,7 +474,7 @@ export async function sendMessage(roomId: string, content: string) {
 
   if (supabase) {
     const { data, error } = await supabase.from('messages').insert(message).select().single();
-    if (!error && data) return data as Message;
+    if (!error && data) return mapMessageRow(data as Record<string, unknown>);
   }
 
   updateMockState((draft) => ({
@@ -463,7 +545,7 @@ export async function listNotifications(userId?: string): Promise<NotificationIt
   if (supabase) {
     const query = supabase.from('notifications').select('*').order('created_at', { ascending: false });
     const { data, error } = userId ? await query.eq('user_id', userId) : await query;
-    if (!error && data) return data as NotificationItem[];
+    if (!error && data) return data.map((row) => mapNotificationRow(row as Record<string, unknown>));
   }
 
   const state = readMockState();
@@ -478,7 +560,7 @@ export async function markNotificationRead(notificationId: string) {
       .eq('id', notificationId)
       .select()
       .single();
-    if (!error && data) return data as NotificationItem;
+    if (!error && data) return mapNotificationRow(data as Record<string, unknown>);
   }
 
   let updated: NotificationItem | null = null;
@@ -498,7 +580,7 @@ export async function listMatches(userId?: string): Promise<Match[]> {
   if (supabase) {
     const query = supabase.from('matches').select('*').order('started_at', { ascending: false });
     const { data, error } = userId ? await query.or(`winner_id.eq.${userId}`) : await query;
-    if (!error && data) return data as Match[];
+    if (!error && data) return data.map((row) => mapMatchRow(row as Record<string, unknown>));
   }
 
   return readMockState().matches;
@@ -513,7 +595,7 @@ export async function listFriends(userId?: string): Promise<Friend[]> {
 export async function createMatch(match: Match) {
   if (supabase) {
     const { data, error } = await supabase.from('matches').insert(match).select().single();
-    if (!error && data) return data as Match;
+    if (!error && data) return mapMatchRow(data as Record<string, unknown>);
   }
 
   updateMockState((state) => ({
